@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Promise.all vs Await Each</title>
+    <style>
+      .progress-container {
+        margin: 20px 0;
+      }
+      .progress-bar {
+        width: 0;
+        height: 30px;
+        background-color: #4caf50;
+        text-align: center;
+        color: white;
+        line-height: 30px;
+      }
+      .progress {
+        width: 100%;
+        background-color: #f3f3f3;
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section id="promise-all">
+        <div id="promise-all-text"></div>
+        <div id="promise-all-timer"></div>
+        <button id="promise-all-btn">Promise.all</button>
+        <div class="progress-container">
+          <div class="progress">
+            <div id="progress-bar1-all" class="progress-bar">Promise 1</div>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress">
+            <div id="progress-bar2-all" class="progress-bar">Promise 2</div>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress">
+            <div id="progress-bar3-all" class="progress-bar">Promise 3</div>
+          </div>
+        </div>
+      </section>
+      <section id="await-each">
+        <div id="await-each-text"></div>
+        <div id="await-each-timer"></div>
+        <button id="await-each-btn">Await Each</button>
+        <div class="progress-container">
+          <div class="progress">
+            <div id="progress-bar1-each" class="progress-bar">Promise 1</div>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress">
+            <div id="progress-bar2-each" class="progress-bar">Promise 2</div>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress">
+            <div id="progress-bar3-each" class="progress-bar">Promise 3</div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      const promiseAllBtn = document.getElementById("promise-all-btn");
+      const awaitEachBtn = document.getElementById("await-each-btn");
+      const promiseAllTimer = document.getElementById("promise-all-timer");
+      const awaitEachTimer = document.getElementById("await-each-timer");
+
+      function createPromise(duration, label, progressBarId) {
+        return new Promise((resolve) => {
+          const startTime = Date.now();
+          console.log(`${label} started at ${startTime}`);
+
+          const progressBar = document.getElementById(progressBarId);
+          progressBar.style.width = "0%";
+          const interval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const percentage = Math.min((elapsed / duration) * 100, 100);
+            progressBar.style.width = `${percentage}%`;
+            if (percentage >= 100) {
+              clearInterval(interval);
+            }
+          }, 100);
+
+          setTimeout(() => {
+            const endTime = Date.now();
+            console.log(
+              `${label} resolved at ${endTime} (duration: ${
+                endTime - startTime
+              } ms)`
+            );
+            resolve(label);
+          }, duration);
+        });
+      }
+
+      const promiseAll = () => {
+        console.log("Starting Promise.all");
+
+        const timerPromiseAllStart = Date.now();
+
+        const promise1 = createPromise(10000, "Promise 1", "progress-bar1-all");
+        const promise2 = createPromise(3000, "Promise 2", "progress-bar2-all");
+        const promise3 = createPromise(8000, "Promise 3", "progress-bar3-all");
+
+        Promise.all([promise1, promise2, promise3]).then((values) => {
+          const timerPromiseAllEnd = Date.now();
+          promiseAllTimer.innerHTML = `Promise All Timer: ${
+            timerPromiseAllEnd - timerPromiseAllStart
+          } ms`;
+          document.getElementById("promise-all-text").innerHTML =
+            values.join(", ");
+          console.log("Promise.all completed at " + timerPromiseAllEnd);
+        });
+      };
+
+      const awaitEach = async () => {
+        console.log("Starting Await Each");
+
+        const timerAwaitEachStart = Date.now();
+
+        const values = [];
+
+        const promise1 = await createPromise(
+          10000,
+          "Promise 1",
+          "progress-bar1-each"
+        );
+        values.push(promise1);
+
+        const promise2 = await createPromise(
+          3000,
+          "Promise 2",
+          "progress-bar2-each"
+        );
+        values.push(promise2);
+
+        const promise3 = await createPromise(
+          8000,
+          "Promise 3",
+          "progress-bar3-each"
+        );
+        values.push(promise3);
+
+        const timerAwaitEachEnd = Date.now();
+        awaitEachTimer.textContent = `Await Each Timer: ${
+          timerAwaitEachEnd - timerAwaitEachStart
+        } ms`;
+        document.getElementById("await-each-text").innerHTML =
+          values.join(", ");
+        console.log("Await Each completed at " + timerAwaitEachEnd);
+      };
+
+      promiseAllBtn.addEventListener("click", () => promiseAll());
+      awaitEachBtn.addEventListener("click", () => awaitEach());
+    </script>
+  </body>
+</html>
