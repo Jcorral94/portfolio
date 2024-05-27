@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bubble Sort</title>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script>
+      const barWidth = 10;
+      const canvas = document.querySelector("#canvas");
+      canvas.width = 700;
+      canvas.height = 400;
+      let bars = Array.from(
+        { length: Math.round(canvas.width / barWidth) },
+        (_, n) => ({
+          value: Math.floor(Math.random() * canvas.height),
+        })
+      );
+      let i = 0;
+      let j = 0;
+      const ctx = canvas.getContext("2d");
+      let reachedEnd = false;
+      let time;
+      let animation;
+      init();
+
+      function init() {
+        animation = window.requestAnimationFrame(draw);
+      }
+
+      function swap(array, x1, x2) {
+        const temp = array[x1];
+        array[x1] = { ...array[x2] };
+        array[x2] = { ...temp };
+      }
+
+      function draw(ms) {
+        clearCanvas();
+        drawBars();
+        bubbleSort();
+        if (reachedEnd) {
+          console.log("Reached the end.");
+          cancelAnimationFrame(animation);
+        } else {
+          animation = window.requestAnimationFrame(draw);
+        }
+      }
+
+      function drawBars() {
+        for (let i = 0; i < bars.length; i++) {
+          const bar = bars[i];
+          const x = 1 + i * barWidth;
+          const y = canvas.height - bar.value;
+          bar.x = x;
+          bar.y = y;
+          ctx.beginPath();
+          ctx.strokeStyle = "red";
+          ctx.font = "8px serif";
+          ctx.textAlign = "center";
+          ctx.strokeText(
+            bar.value,
+            i * barWidth + barWidth / 2,
+            canvas.height - bar.value + 10
+          );
+          ctx.strokeRect(x, y, barWidth - 2, canvas.height);
+          ctx.stroke();
+        }
+      }
+
+      function bubbleSort() {
+        if (j === bars.length - i - 1) {
+          i += 1;
+          j = 0;
+        }
+
+        if (i === bars.length - 1) {
+          reachedEnd = true;
+          console.log(reachedEnd, bars);
+        }
+
+        if (reachedEnd) return;
+        // if(x > bars.length - 1) return;
+
+        const curr = bars[j];
+        const next = bars[j + 1];
+        if (curr?.value > next?.value) {
+          swap(bars, j, j + 1);
+        }
+
+        j++;
+      }
+
+      function clearCanvas() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    </script>
+  </body>
+</html>
